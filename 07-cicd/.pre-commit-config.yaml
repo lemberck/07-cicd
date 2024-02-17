@@ -1,0 +1,18 @@
+repos:
+  - repo: local # use linter configured on local
+    hooks:
+    - id: flake8
+      name: flake8
+      entry: poetry run flake8 # Uses system Python where Poetry is installed
+      language: system  # Uses system Python where Poetry is installed
+      types: [python] # only run on python files
+
+  - repo: local # use linter configured on local
+    hooks:
+    - id: pylint
+      name: pylint
+      entry: poetry run pylint # Uses system Python where Poetry is installed
+      language: system  # Uses system Python where Poetry is installed
+      pass_filenames: true
+      types: [python] # only run on python files
+     # args:  ['--disable=R,C,W']  # means that pylint will not report refactor suggestions, convention messages, or warnings. It will only report errors (E) and fatal messages (F), which are typically the most critical issues.
