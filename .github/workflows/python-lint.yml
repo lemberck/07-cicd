@@ -29,6 +29,6 @@ jobs:
 
       - name: Run Pylint
         run: |
-          score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print $7}')
+          score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print substr($7, 1, index($7, "/") - 1)}')
           echo "Pylint score: $score"
           python -c "import sys; sys.exit(0 if float('$score') >= 9 else 1)"
