@@ -18,11 +18,13 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       
-      # Install Minikube dependencies
+      # Install Minikube dependencies, including conntrack and crictl
       - name: Install Minikube dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y conntrack
+          VERSION="v1.21.0" # use the latest version compatible with your Kubernetes
+          curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/v${VERSION}/crictl-v${VERSION}-linux-amd64.tar.gz | sudo tar -C /usr/local/bin -xz
       
       # Start Minikube
       - name: Start Minikube
