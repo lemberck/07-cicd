@@ -24,6 +24,8 @@ It is considered easier to integrate into a CI/CD pipeline due to its speed and 
 
 > You can add a **.pylintrc** file to customize the rules to fit the project's guidelines
 
+NOTE : If facing an error `[Errno 13] Permission denied: b'/var/lib/docker/overlay2/b23cb536bf8b0ccc4a0f6570ea820a95d6d22a6ca1212b1f104b0fd58077c487/diff/opt/kafka_2.12-2.3.0/bin/...` , run `poetry update`
+
 #### --- After running the linters, solve the issues manually.
 
 
