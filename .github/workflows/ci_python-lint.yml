@@ -3,8 +3,12 @@ name: Lint Python Code
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.md' # ignores only .md changes
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.md' # ignores only .md changes
   workflow_dispatch: # Adds a manual trigger for the workflow
 
 jobs:
