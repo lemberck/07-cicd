@@ -119,9 +119,9 @@ jobs:
       run: poetry run flake8 .
 
     - name: Run Pylint
-    # Runs Pylint on all Python files in the project. Ensures the command exits with a success status even if issues are found, then extracts, prints the Pylint score, and checks if it meets a minimum score of 9, failing otherwise.
+    # Runs Pylint on all Python files in the project. Ensures the command exits with a success status even if issues are found, then extracts, prints the Pylint score, and checks if it meets a minimum score of 9 (exit 0), failing otherwise (exit 1).
       run: |
-        score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print $7}')
+        score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print substr($7, 1, index($7, "/") - 1)}')
         echo "Pylint score: $score"
-        [[ $(echo "$score >= 9" | bc -l) -eq 1 ]]
+        python -c "import sys; sys.exit(0 if float('$score') >= 9 else 1)"
   ```
