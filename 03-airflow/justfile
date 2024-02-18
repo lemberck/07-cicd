@@ -1,8 +1,0 @@
-up:
-    docker-compose build && docker-compose up -d airflow-init && docker-compose up -d
-
-down:
-    docker-compose down --volumes --rmi all
-
-
-
