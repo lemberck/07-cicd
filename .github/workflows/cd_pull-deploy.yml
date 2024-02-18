@@ -1,0 +1,46 @@
+name: CD - Pull and Deploy
+
+# This workflow is triggered after the CI workflow has successfully completed
+on:
+  workflow_run:
+    workflows: ["CI - Lint, Build, and Push Docker Images"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Ensure the job only runs if the triggering CI workflow was successful
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      
+      # Install kubectl (You may skip this if you use a hosted Kubernetes service that provides kubectl)
+      - name: Install kubectl
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+      # Install Helm
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      # Deploy the application using Helm
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install sentiment-analysis ./helm-sentiment-analysis-mlops --namespace sentiment-analysis-mlops --create-namespace
+
+      # Optionally, verify the deployment
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/sentiment-analysis-backend --namespace sentiment-analysis-mlops
+          kubectl rollout status deployment/sentiment-analysis-frontend --namespace sentiment-analysis-mlops
+
+      # Cleanup steps can be included as well or set up as separate manual jobs
