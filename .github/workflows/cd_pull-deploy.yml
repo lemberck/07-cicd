@@ -17,30 +17,20 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      
-      # Install Minikube dependencies, including conntrack and crictl
-      - name: Install Minikube dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y conntrack
-          VERSION="v1.21.0" # use the latest version compatible with your Kubernetes
-          curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/v${VERSION}/crictl-v${VERSION}-linux-amd64.tar.gz | sudo tar -C /usr/local/bin -xz
-      
-      # Start Minikube
-      - name: Start Minikube
-        run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube /usr/local/bin/
-          sudo minikube start --driver=none
-          minikube update-context
 
-      # Install kubectl
-      - name: Install kubectl
+      # Set up Google Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: 'latest'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # Configure kubectl to connect to the GKE cluster
+      - name: Configure kubectl
         run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-          kubectl version --client
+          gcloud container clusters get-credentials YOUR_CLUSTER_NAME --zone YOUR_CLUSTER_ZONE --project ${{ secrets.GCP_PROJECT_ID }}
 
       # Install Helm
       - name: Install Helm
@@ -49,15 +39,31 @@ jobs:
           chmod 700 get_helm.sh
           ./get_helm.sh
 
-      # Deploy the application using Helm
+      # Deploy the application using Helm and set the dynamic tags (commit SHA) to pull the right image
       - name: Deploy with Helm
         run: |
-          helm upgrade --install sentiment-analysis ./helm-sentiment-analysis-mlops --namespace sentiment-analysis-mlops --create-namespace
+          helm upgrade --install sentiment-analysis ./helm-sentiment-analysis-mlops \
+            --namespace sentiment-analysis-mlops \
+            --create-namespace \
+            --set backend.deployment.container.image=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.PROJECT_NAME }} \
+            --set backend.deployment.container.tag=${{ github.sha }} \
+            --set frontend.deployment.container.image=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.PROJECT_NAME }} \
+            --set frontend.deployment.container.tag=${{ github.sha }}
 
-      # Optionally, verify the deployment
+
+      # Optionally, verify the deployment on the GKE cluster
       - name: Verify deployment
         run: |
           kubectl rollout status deployment/sentiment-analysis-backend --namespace sentiment-analysis-mlops
           kubectl rollout status deployment/sentiment-analysis-frontend --namespace sentiment-analysis-mlops
 
-      # Cleanup steps can be included as well or set up as separate manual jobs
+      # Add cleanup steps if needed
+
+
+# Replace YOUR_CLUSTER_NAME with the name of your GKE cluster and YOUR_CLUSTER_ZONE with the zone where your cluster is located. 
+
+# The subsequent Helm and kubectl commands assume that the Helm chart ./helm-sentiment-analysis-mlops is correctly set up to work 
+# with your GKE cluster and that the necessary resources (like container images) are accessible.
+
+#  set up the GCP_PROJECT_ID and GCP_SA_KEY (service account key) as secrets in your GitHub repository. The service account 
+# should have sufficient permissions to interact with GKE.
