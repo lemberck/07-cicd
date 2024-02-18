@@ -18,6 +18,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       
+      # Install Minikube dependencies
+      - name: Install Minikube dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y conntrack
+      
       # Start Minikube
       - name: Start Minikube
         run: |

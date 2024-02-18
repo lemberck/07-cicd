@@ -12,7 +12,7 @@ on:
   workflow_dispatch:  # Adds a manual trigger for the workflow
 
 jobs:
-  CI_lint-and-build:
+  CI_lint-build-push:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
