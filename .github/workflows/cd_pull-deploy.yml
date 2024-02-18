@@ -9,7 +9,6 @@ on:
     branches: [ main ]
   workflow_dispatch:  # Adds a manual trigger for the workflow
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,7 +18,15 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       
-      # Install kubectl (You may skip this if you use a hosted Kubernetes service that provides kubectl)
+      # Start Minikube
+      - name: Start Minikube
+        run: |
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube /usr/local/bin/
+          sudo minikube start --driver=none
+          minikube update-context
+
+      # Install kubectl
       - name: Install kubectl
         run: |
           curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
