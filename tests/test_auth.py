@@ -1,6 +1,7 @@
 import pytest
 import sqlite3
-from backend.auth import authenticate_user  # Adjust the import path as necessary
+from backend.auth import authenticate_user
+
 
 @pytest.fixture(scope="module")
 def db():
@@ -16,11 +17,14 @@ def db():
             );
         """)
         # Insert a test user
-        connection.execute("INSERT INTO users (name, password) VALUES (?, ?)", ("test_user", "test_password"))
-    
+        connection.execute("INSERT INTO users (name, password) VALUES (?, ?)",
+                           ("test_user", "test_password")
+                           )
+
     yield connection  # Yield the connection for tests to use
 
-    # Cleanup is automatic for in-memory databases when the connection is closed
+    # Cleanup is automatic for in-memory
+    # databases when the connection is closed
     connection.close()
 
 
@@ -30,13 +34,15 @@ def db_cursor(db):
     yield db.cursor()
     db.commit()
 
+
 def test_authenticate_user_success(db_cursor):
     """Test successful authentication with correct user credentials."""
     # Attempt to authenticate with the correct username and password
     user = authenticate_user("test_user", "test_password")
     # Ensure the authentication was successful
     assert user is not None
-    assert user[1] == "test_user"  # Assuming the second element is the username
+    assert user[1] == "test_user"
+
 
 def test_authenticate_user_failure_incorrect_password(db_cursor):
     """Test unsuccessful authentication with an incorrect password."""
@@ -45,10 +51,10 @@ def test_authenticate_user_failure_incorrect_password(db_cursor):
     # Ensure the authentication failed
     assert user is None
 
+
 def test_authenticate_user_failure_nonexistent_user(db_cursor):
     """Test unsuccessful authentication with a nonexistent username."""
     # Attempt to authenticate with a username that does not exist
     user = authenticate_user("nonexistent_user", "any_password")
     # Ensure the authentication failed
     assert user is None
-
