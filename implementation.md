@@ -69,4 +69,56 @@ Pre-commit is used to automate the enforcement of code style instead of just rep
     git commit -m "Add pre-commit hooks for flake8 and pylint"
     ```
 
-## CI/CD Workflow
+## CI/CD Workflow with GitHub Actions
+  1 - Create the workflow directory at the root of the  project : `mkdir -p .github/workflows`
+
+  2 - Create Workflow File for the linters : `touch .github/workflows/python-lint.yml`
+
+  3 - Edit the yml file : `code .github/workflows/python-lint.yml` [VSCode]
+  ```bash
+  #Name of the GitHub Actions workflow. Shows in the GH UI when the action runs.
+  name: Lint Python Code 
+
+# The events that trigger the workflow. In this case, the workflow runs on push events and pull_request events targeting the main branch.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Defines a job named lint. Jobs are a set of steps that execute on the same runner.
+jobs:
+  lint:
+
+  # Type of runner that the job will run on. Here, it uses the latest version of Ubuntu provided by GitHub Actions.
+    runs-on: ubuntu-latest
+
+  #  List of steps to be executed as part of the job. Each step can run commands or actions.
+    steps:
+    - name: Check out repository code
+    # Action to check out the repository code so it can be used by the workflow. Necessary to access the repository's contents.
+      uses: actions/checkout@v2
+      
+    - name: Set up Python
+    # Action to set up a specific version of Python. Allows next steps to run Python commands.
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies with Poetry
+    # Installs Poetry using pip then uses it to install only the project's dependencies as defined in pyproject.toml.
+      run: |
+        pip install poetry
+        poetry install --no-root
+
+    - name: Run Flake8
+    # Runs Flake8 to check for style violations and coding errors in all the project.
+      run: poetry run flake8 .
+
+    - name: Run Pylint
+    # Runs Pylint on all Python files in the project. Ensures the command exits with a success status even if issues are found, then extracts, prints the Pylint score, and checks if it meets a minimum score of 9, failing otherwise.
+      run: |
+        score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print $7}')
+        echo "Pylint score: $score"
+        [[ $(echo "$score >= 9" | bc -l) -eq 1 ]]
+  ```
