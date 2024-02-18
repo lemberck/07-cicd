@@ -1,5 +1,9 @@
 # Implementation
 
+
+# CI Pipeline
+Responsible for linters, unit tests, integration tests.
+
 ## Add linters to poetry
 - Start poetry env : `poetry shell`
 - Add linters to dev env only : `poetry add --group dev pylint flake8`
@@ -71,12 +75,12 @@ Pre-commit is used to automate the enforcement of code style instead of just rep
     git commit -m "Add pre-commit hooks for flake8 and pylint"
     ```
 
-## CI/CD Workflow with GitHub Actions
+## CI Workflow with GitHub Actions
   1 - Create the workflow directory at the root of the  project : `mkdir -p .github/workflows`
 
-  2 - Create Workflow File for the linters : `touch .github/workflows/python-lint.yml`
+  2 - Create Workflow File for the linters : `touch .github/workflows/ci_python-lint.yml`
 
-  3 - Edit the yml file : `code .github/workflows/python-lint.yml` [VSCode]
+  3 - Edit the yml file : `code .github/workflows/ci_python-lint.yml` [VSCode]
   ```bash
   #Name of the GitHub Actions workflow. Shows in the GH UI when the action runs.
   name: Lint Python Code 
@@ -124,4 +128,19 @@ jobs:
         score=$(poetry run pylint **/*.py --exit-zero --fail-under=9 | grep "Your code has been rated at" | awk '{print substr($7, 1, index($7, "/") - 1)}')
         echo "Pylint score: $score"
         python -c "import sys; sys.exit(0 if float('$score') >= 9 else 1)"
+  ```
+  4 - Commit the workflow creation
+  > NOTE: In order to GitHub Actions recognize workflow files, they must be located in the .github/workflows directory at the root of the project. 
+  To enable testing, the **07-cicd/ directory has been committed to its own separate remote repository**. The workflow file within 07-cicd/ inside the mlops remote repository will not trigger GitHub Actions workflows; it serves purely to consolidate related mlops project materials.
+
+  5 - Go to GH repo > Actions . The workflow must be at the Workflow section on the left. It is possible to trigger it manually (it was configured as such) and it will triggers automatically everytime there is a push or pull request to the main branch.
+
+  # CD pipeline
+  Responsible for Building a new image, take to image repository and deploying it.
+
+  ## CD Workflow with Github Actions
+  1 - Create Workflow File for the cd pipeline : `touch .github/workflows/cd_build-deploy.yml`
+  2 - Edit the yml file : `code .github/workflows/cd_build-deploy.yml` [VSCode]
+  ```bash
+
   ```
