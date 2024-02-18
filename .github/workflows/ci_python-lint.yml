@@ -12,7 +12,7 @@ on:
   workflow_dispatch:  # Adds a manual trigger for the workflow
 
 jobs:
-  lint-and-build:
+  CI_lint-and-build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -38,10 +38,10 @@ jobs:
           python -c "import sys; sys.exit(0 if float('$score') >= 9 else 1)"
 
       - name: Build backend Docker image
-        run: docker build -t lemberck/backend:${{ github.sha }} -f Dockerfile-backend .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.PROJECT_NAME }}-backend:${{ github.sha }} -f Dockerfile-backend .
 
       - name: Build frontend Docker image
-        run: docker build -t lemberck/frontend:${{ github.sha }} -f Dockerfile-frontend .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.PROJECT_NAME }}-frontend:${{ github.sha }} -f Dockerfile-frontend .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Push backend Docker image to Docker Hub
-        run: docker push lemberck/backend:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.PROJECT_NAME }}-backend:${{ github.sha }}
 
       - name: Push frontend Docker image to Docker Hub
-        run: docker push lemberck/frontend:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.PROJECT_NAME }}-frontend:${{ github.sha }}
