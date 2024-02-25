@@ -60,6 +60,12 @@ jobs:
       # Add cleanup steps if needed
 
 
+
+
+
+
+      
+
 # Replace YOUR_CLUSTER_NAME with the name of your GKE cluster and YOUR_CLUSTER_ZONE with the zone where your cluster is located. 
 
 # The subsequent Helm and kubectl commands assume that the Helm chart ./helm-sentiment-analysis-mlops is correctly set up to work 
